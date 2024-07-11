@@ -1,0 +1,117 @@
+1 hgr
+2 dim c3(7, 2)
+3 xv = 1
+4 yv = 1
+5 zv = 0
+6 dim c2(7, 1)
+7 cs = 50
+8 cx = 80 : cy = 80
+9 sd = 0
+10 gosub 1000
+11 hcolor = 1
+12 f = 1
+13 dl = 0
+14 ms = 1
+15 def Fn round(x) = int(x*10)/10
+16 rs = 0.01
+17 buffer = 15
+
+100 rem game loop
+200 gosub 4000
+300 gosub 2000
+400 gosub 5000
+500 gosub 3000
+600 gosub 7000
+700 gosub 8000
+999 goto 100
+
+1000 rem define cube
+1010 For I = 0 to 7
+1020 If I = 2 or I = 3 or I = 6 or I = 7 then b = 1
+1030 c3 (I, 0) = cx + cs*b
+1040 b = 0
+1050 If I > 3 then b = 1
+1060 c3 (I, 1) = cy + cs*b
+1070 b = 0
+1080 If I  = 1 or I = 2 or I = 5 or I = 6 then b = 1
+1090 c3 (I, 2) = sd + cs*b
+1100 b = 0
+1110 Next i 
+1999 return
+
+2000 rem convert to 2D
+2010 for i = 0 to 7
+2020 c2(i, 0) = c3(i, 0) - c3(i, 2)/5
+2030 c2(i, 1) = c3(i, 1) - c3(i, 2)/5
+2040 next i
+2999 return
+
+3000 rem draw
+3010 poke 230, 32 * (f + 1) : call 62450
+3020 for i = 0 to 7 step 4
+3030 hplot c2(i, 0), c2(i, 1) to c2(i + 1, 0), c2(i + 1, 1)
+3040 hplot c2(i + 1, 0), c2(i + 1, 1) to c2(i + 2, 0), c2(i + 2, 1)
+3050 hplot c2(i, 0), c2(i, 1) to c2(i + 3, 0), c2(i + 3, 1)
+3060 hplot c2(i + 3, 0), c2(i + 3, 1) to c2(i + 2, 0), c2(i + 2, 1)
+3070 next i
+3080 hplot c2(0, 0), c2(0, 1) to c2(4, 0), c2(4, 1)
+3090 hplot c2(1, 0), c2(1, 1) to c2(5, 0), c2(5, 1)
+3100 hplot c2(2, 0), c2(2, 1) to c2(6, 0), c2(6, 1)
+3110 hplot c2(3, 0), c2(3, 1) to c2(7, 0), c2(7, 1)
+3120 poke 49236 + f, 0 
+3130 f = not f
+3999 return
+
+4000 rem move cube
+4010 cx = cx + xv * ms
+4020 cy = cy + yv * ms
+4030 sd = sd + zv * ms
+4040 xr = xr + rs
+4050 yr = yr + rs
+4060 zr = zr + rs
+4070 gosub 1000
+4080 gosub 9000
+4999 return
+
+5000 rem check Borders
+5010 for it = 0 to 7
+5020 if c2(it, 0) >= 279 - buffer and xv > 0 then xv = xv * -1 : for i1 = 0 to 7 : c3(i1, 0) = c3(i1, 0) - sp : next i1 : gosub 2000
+5030 if c2(it, 0) <= 0 + buffer  and xv < 0 then xv = xv * -1 : for i2 = 0 to 7 : c3(i2, 0) = c3(i2, 0) + sp : next i2 : gosub 2000
+5040 if c2(it, 1) >= 160 - buffer and yv > 0 then yv = yv * -1 : for i3 = 0 to 7 : c3(i3, 1) = c3(i3, 1) - sp : next i3 : gosub 2000
+5050 if c2(it, 1) <= 0 + buffer and yv < 0 then yv = yv * -1 : for i4 = 0 to 7 : c3(i4, 1) = c3(i4, 1) + sp : next i4 : gosub 2000
+5060 next it
+5999 return
+
+6000 rem list c2
+6010 for li = 3 to 3
+6020 print str$(c2(li, 0)) + " " + str$(c2(li, 1))
+6030 next li
+6999 return
+
+7000 rem wait
+7010 for i = 0 to dl : next i
+7999 return
+
+8000 rem keyListener
+8000 let k = peek(49152)
+8010 if k = 139 and sp < 10 then ms = fn round(ms + 0.1001)
+8020 if k = 138 and sp > 0 then ms = fn round(ms - 0.1001)
+8030 if k = 210 then rotating = not rotating
+8040 if k = 211 then rs = rs - 0.01
+8050 if k = 198 then rs = rs + 0.01
+8998 let k = PEEK(49168)
+8999 return
+
+9000 rem apply rotation matrices
+9010 for i = 0 to 7
+9020 y1 = ((c3(i, 1) - (cy + cs/2)) * cos(xr) + (c3(i, 2) - (sd + cs/2)) * -sin(xr)) + (cy + cs/2)
+9030 z1 = ((c3(i, 1) - (cy + cs/2)) * sin(xr) + (c3(i, 2) - (sd + cs/2)) * cos(xr)) + (sd + cs/2)
+9040 c3(i, 1) = y1 : c3(i, 2) = z1
+9050 x2 = ((c3(i, 0) - (cx + cs/2)) * cos(yr) + (c3(i, 2) - (sd + cs/2)) * sin(yr)) + (cx + cs/2)
+9060 z2 = ((c3(i, 0) - (cx + cs/2)) * -sin(yr) + (c3(i, 2) - (sd + cs/2)) * cos(yr)) + (sd + cs/2)
+9070 c3(i, 0) = x2 : c3(i, 2) = z2
+9080 x3 = ((c3(i, 0) - (cx + cs/2)) * cos(zr) + (c3(i, 1) - (cy + cs/2)) * -sin(zr)) + (cx + cs/2)
+9090 y3 = ((c3(i, 0) - (cx + cs/2)) * sin(zr) + (c3(i, 1) - (cy + cs/2)) * cos(zr)) + (cy + cs/2)
+9100 c3(i, 0) = x3 : c3(i, 1) = y3
+9110 next i
+9999 return
