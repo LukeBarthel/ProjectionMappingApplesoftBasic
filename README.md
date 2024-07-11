@@ -6,7 +6,7 @@ This program is a basic 3D Cube Simulation written in Applesoft Basic. You can t
 ## 1. Variable Initialization
 In Applesoft Basic, only the first two letters of a variable are significant. To avoid confusion, short variable names are used:
 
-hgr: Initializes high-resolution graphics mode.
+- hgr: Initializes high-resolution graphics mode.
 - cx, cy, sd: Cube position coordinates and side depth.
 - xv, yv, zv: Cube movement velocities.
 - dim c3(7,2): Defines a 3D array c3 to hold the 3D coordinates of the cube’s vertices.
